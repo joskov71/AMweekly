@@ -1,0 +1,61 @@
+name: Create webpage snapshot
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install chromium
+
+      - name: Wait for GitHub Pages update
+        run: sleep 60
+
+      - name: Take screenshot
+        run: |
+          cat > screenshot.js <<'EOF'
+          const { chromium } = require('playwright');
+
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage({
+              viewport: { width: 1400, height: 1000 }
+            });
+
+            await page.goto('https://joskov71.github.io/AMweekly/', {
+              waitUntil: 'networkidle'
+            });
+
+            await page.screenshot({
+              path: 'snapshot.png',
+              fullPage: false
+            });
+
+            await browser.close();
+          })();
+          EOF
+
+          node screenshot.js
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add snapshot.png
+          git commit -m "Update webpage snapshot" || echo "No snapshot changes"
+          git push
