@@ -8,14 +8,7 @@
     <style>
         html, body { margin: 0; padding: 0; }
         html { font-size: 17px; }
-        body {
-            background: #f8f8f8;
-            background-image: url(https://raw.githubusercontent.com/thesephist/unim.press/master/static/img/newspaper.jpg);
-            background-size: 200px 200px;
-            --foreground: #222;
-            color: var(--foreground);
-            font-family: "EB Garamond", "Georgia", "Times New Roman", serif;
-        }
+        body { background: #f8f8f8; background-image: url(https://raw.githubusercontent.com/thesephist/unim.press/master/static/img/newspaper.jpg); background-size: 200px 200px; --foreground: #222; color: var(--foreground); font-family: "EB Garamond", "Georgia", "Times New Roman", serif; }
         .app { width: 1200px; margin: 1em auto; overflow: hidden; }
         .flex-row { display: flex; flex-direction: row; justify-content: flex-start; align-items: flex-start; }
         .flex-column { display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; }
@@ -34,7 +27,8 @@
         .story { padding: 0.6em 0.8em; box-sizing: border-box; width: 100%; word-break: break-word; }
         .story-title { margin-top: 0; margin-bottom: 0.8rem; line-height: 1.2em; letter-spacing: -0.03em; }
         .story-title::after { display: block; content: ""; height: 1px; background: var(--foreground); margin: 0.8rem 0; width: 50%; margin-left: 20%; }
-        .story-image { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: none; margin-bottom: 0.5em; image-rendering: auto; }
+        .story-image { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: grayscale(100%); margin-bottom: 0.5em; transition: filter 0.3s ease; }
+        .story:hover .story-image, .fun-item:hover .story-image { filter: none; }
         .story-title:hover, .story-title a:hover { text-decoration: underline; }
         .story-byline { margin-bottom: 0.5rem; font-weight: bold; font-size: 0.85em; }
         .story-author { text-transform: uppercase; }
@@ -57,26 +51,20 @@
         .smaller p { font-size: 0.9rem; }
         .briefs { border-top: 1px solid var(--foreground); padding-top: 1em; margin-top: 0.5em; font-size: 0.75rem; width: 100%; display: flex; flex-wrap: wrap; box-sizing: border-box; }
         .briefs h3, .fun-corner h3, .journal-watch h3 { text-transform: uppercase; letter-spacing: 0.1em; font-size: 1em; margin: 0 0 0.5em 0.8em; width: 100%; }
-        .brief-item { padding: 0.4em 0.8em; box-sizing: border-box; flex: 1; min-width: 280px; }
-        .brief-item h4 { margin: 0 0 0.3em 0; font-size: 1.1em; }
-        .brief-item .brief-meta, .fun-item .fun-meta { font-size: 0.85em; color: #555; font-style: italic; margin-bottom: 0.2em; }
-        .brief-item p { margin: 0; }
+        .brief-item, .journal-entry { padding: 0.4em 0.8em; box-sizing: border-box; flex: 1; min-width: 280px; }
+        .brief-item h4, .journal-entry h4 { margin: 0 0 0.3em 0; font-size: 1.1em; }
+        .brief-item .brief-meta, .fun-item .fun-meta, .journal-entry .journal-name { font-size: 0.85em; color: #555; font-style: italic; margin-bottom: 0.2em; }
+        .brief-item p, .fun-item p, .journal-entry p { margin: 0; }
         .fun-corner { border-top: 1px solid var(--foreground); padding-top: 1em; margin-top: 0.5em; width: 100%; box-sizing: border-box; }
-        .fun-corner h3 { font-size: 0.85em; }
         .fun-corner-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em; padding: 0 0.8em; width: 100%; box-sizing: border-box; }
         .fun-item { padding: 0.5em; font-size: 0.8rem; }
         .fun-item h4 { margin: 0 0 0.3em 0; font-size: 1em; }
-        .fun-item p { margin: 0; font-size: 0.9em; }
         .paper-spotlight { border: 2px solid var(--foreground); padding: 1em; margin: 1em 0.8em; }
         .paper-spotlight h3 { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.85em; margin: 0 0 0.5em 0; }
         .paper-spotlight .paper-title { font-size: 1.2em; font-weight: bold; margin-bottom: 0.3em; }
         .paper-spotlight .paper-authors { font-style: italic; margin-bottom: 0.5em; font-size: 0.9em; }
         .journal-watch { padding-top: 1em; margin-top: 0.5em; font-size: 0.75rem; width: 100%; display: flex; flex-wrap: wrap; box-sizing: border-box; }
-        .journal-entry { padding: 0.4em 0.8em; box-sizing: border-box; flex: 1; min-width: 280px; }
-        .journal-entry h4 { margin: 0 0 0.2em 0; font-size: 1.1em; }
-        .journal-entry .journal-name { font-size: 0.9em; font-style: italic; margin-bottom: 0.2em; }
         .journal-entry .journal-authors { font-size: 0.85em; color: #555; margin-bottom: 0.2em; }
-        .journal-entry p { margin: 0; }
         footer { width: 100%; border-top: 1px solid var(--foreground); padding-top: 1em; margin: 2em 0 1em; text-align: center; font-size: 0.85em; font-style: italic; }
         @media print { body { background: white; } .app { margin: 0; width: 100%; } .story-image { filter: none; } @page { size: A4; margin: 1.5cm; } }
         @media screen and (max-width: 1240px) { .app { transform-origin: top center; transform: scale(calc(100vw / 1240)); } }
@@ -86,192 +74,135 @@
 <div class="app flex-column">
     <header class="flex-column">
         <div class="masthead-row flex-row">
-            <div class="header-tagline">No cleanroom? No problem.</div>
+            <div class="header-tagline">Powder, polish, propel.</div>
             <div class="masthead-title"><h1 class="fraktur masthead">Additive Manufacturing Weekly</h1></div>
-            <div class="header-edition"><div class="header-edition-title">Today's Edition</div><p>MIT’s printed microfluidic nozzles lead an issue focused on accessible metal AM, smarter qualification and production-ready materials.</p></div>
+            <div class="header-edition">
+                <div class="header-edition-title">Today's Edition</div>
+                <p>Beehive's EOS fleet order turns metal additive manufacturing from engine promise into production arithmetic.</p>
+            </div>
         </div>
-        <div class="header-bar flex-row"><div class="header-date">TUESDAY, JUNE 9, 2026</div></div>
+        <div class="header-bar flex-row"><div class="header-date">Thursday, June 18, 2026</div></div>
     </header>
+
     <div class="main flex-row">
-        <div class="left-sidebar flex-column smaller"><div class="story">
-                    <div class="story-source"><a href="https://www.tctmagazine.com/lasefinity-fusionx-compact-desktop-metal-3d-printer-launches-at-tct-3sixty/">TCT Magazine</a></div>
-                    <h2 class="story-title"><a href="https://www.tctmagazine.com/lasefinity-fusionx-compact-desktop-metal-3d-printer-launches-at-tct-3sixty/">Desktop LPBF System Targets Labs And Small Workshops</a></h2>
-                    <div class="story-byline">By <span class="story-author">Laura Griffiths</span></div>
-                    <img class="story-image" src="https://storage.ghost.io/c/f0/da/f0da4f6a-82b1-46cf-ab14-3cc5e6b2d473/content/images/size/w1200/2026/06/Lasefinity-FusionX-at-TCT-3Sixty.jpeg" alt="">
-                    <p>Lasefinity has introduced the Fusion X, a compact laser powder bed fusion machine aimed at laboratories, smaller companies and technical training environments. The worktop-scale system uses a 500 W fibre laser, a 100 × 100 × 80 mm build volume and open material access, positioning metal AM as a more approachable research and development tool.</p>
-                </div><div class="story">
-                    <div class="story-source"><a href="https://3dprint.com/326496/continuum-powders-launches-on-demand-alloy-service-for-small-batch-production/">3DPrint.com</a></div>
-                    <h2 class="story-title"><a href="https://3dprint.com/326496/continuum-powders-launches-on-demand-alloy-service-for-small-batch-production/">Continuum Opens Small-Batch Route For Custom Metal Powders</a></h2>
-                    <div class="story-byline">By <span class="story-author">Matt Kremenetsky</span></div>
-                    
-                    <p>Continuum Powders has launched Custom Foundry Runtime, a service intended to produce small batches of customer-specified alloys using its Greyhound Melt-to-Powder platform. The offer links flexible alloy development with circular feedstock logic, converting scrap into new powder without the conventional ingot step.</p>
-                </div><div class="story">
-                    <div class="story-source"><a href="https://3dprint.com/326406/university-of-arkansas-researchers-test-metal-3d-printing-in-a-mars-like-atmosphere/">3DPrint.com</a></div>
-                    <h2 class="story-title"><a href="https://3dprint.com/326406/university-of-arkansas-researchers-test-metal-3d-printing-in-a-mars-like-atmosphere/">Mars-Like Atmosphere Test Gives Metal AM A Space Workshop Clue</a></h2>
-                    <div class="story-byline">By <span class="story-author">Vanesa Listek</span></div>
-                    
-                    <p>University of Arkansas researchers have tested laser powder bed fusion of 316L stainless steel in a carbon dioxide atmosphere designed to approximate Martian conditions. Argon still produced the strongest results, but CO₂ performed better than ordinary air, suggesting a practical research route for future in-situ manufacturing beyond Earth.</p>
-                </div></div>
+        <div class="left-sidebar flex-column smaller">
+            <div class="story">
+                <div class="story-source"><a href="https://www.voxelmatters.com/improving-powder-removal-in-metal-additive-manufacturing-with-dfam/">VoxelMatters</a></div>
+                <h2 class="story-title"><a href="https://www.voxelmatters.com/improving-powder-removal-in-metal-additive-manufacturing-with-dfam/">DfAM Targets Powder Removal Bottleneck</a></h2>
+                <div class="story-byline">By <span class="story-author">VoxelMatters</span></div>
+                <p>Powder removal remains one of metal AM's quiet production constraints, especially as machines grow faster and more consistent. The VoxelMatters item frames depowdering as a design problem as much as a shop-floor step, arguing that part geometry, access paths, and process planning must be considered early if powder bed fusion is to scale reliably.</p>
+            </div>
+            <div class="story">
+                <div class="story-source"><a href="https://www.voxelmatters.com/raise3d-launches-b520-automated-sandblaster-and-expanded-sls-powder-lineup/">VoxelMatters</a></div>
+                <h2 class="story-title"><a href="https://www.voxelmatters.com/raise3d-launches-b520-automated-sandblaster-and-expanded-sls-powder-lineup/">Raise3D Automates SLS Blasting</a></h2>
+                <div class="story-byline">By <span class="story-author">VoxelMatters</span></div>
+                <img class="story-image" src="https://www.voxelmatters.com/wp-content/uploads/2026/04/Raise3D-B520.jpg" alt="">
+                <p>Raise3D's B520 automated blasting system puts post-processing hardware beside its SLS powder expansion, a sign that polymer powder bed fusion vendors are packaging finishing as part of the production workflow. The launch points at a market where repeatable cleaning and surface preparation matter nearly as much as build throughput.</p>
+            </div>
+            <div class="story">
+                <div class="story-source"><a href="https://3dadept.com/rem-develops-surface-finishing-process-for-aheadd-cp1/">3D ADEPT</a></div>
+                <h2 class="story-title"><a href="https://3dadept.com/rem-develops-surface-finishing-process-for-aheadd-cp1/">REM Finishes Aheadd CP1</a></h2>
+                <div class="story-byline">By <span class="story-author">3D ADEPT</span></div>
+                <p>REM has developed a surface finishing route for Constellium's Aheadd CP1, an aluminum alloy used with laser powder bed fusion in aerospace, defense, motorsport and semiconductor applications. The work addresses fatigue life, fluid cleanliness, RF performance and pressure-drop demands, tying finishing directly to part function.</p>
+            </div>
+        </div>
+
         <div class="spreads flex-column">
             <div class="top flex-row">
-                <div class="center-spread"><div class="story">
-                    <div class="story-source"><a href="https://news.mit.edu/2026/3d-printed-devices-could-streamline-drug-delivery-microparticle-production-0609">MIT News</a></div>
-                    <h2 class="story-title"><a href="https://news.mit.edu/2026/3d-printed-devices-could-streamline-drug-delivery-microparticle-production-0609">3D-Printed Nozzles Move Microparticles Out Of Cleanrooms</a></h2>
-                    <div class="story-byline">By <span class="story-author">Adam Zewe</span></div>
-                    <img class="story-image" src="https://news.mit.edu/sites/default/files/download/202606/MIT-Triaxial-Emitters-01-press.jpg" alt="">
-                    <p>MIT researchers have turned a demanding microfabrication problem into an additive manufacturing story. Their triaxial electrospray emitter arrays, built by vat photopolymerisation, combine fine external nozzles with a hidden network of internal channels, allowing three separate liquids to be dispensed into uniform, layered microdroplets.</p><p>The advance matters because electrospray devices normally depend on semiconductor cleanroom routes that are costly, slow and geometrically restrictive. By printing the arrays directly, the team produced complex devices in hours, with 16 nozzles packed into an area of about one square centimetre.</p><p>The immediate target is high-throughput production of layered microparticles, including time-release drug carriers, biosensing particles and artificial-cell-like constructs. The same principle could also serve functional materials, where layered droplets become the building blocks of self-healing composites or engineered microcapsules.</p><p>For additive manufacturing, the work is a reminder that value is not limited to finished structural parts. Here, 3D printing becomes a manufacturing enabler: it makes the tool that makes the product, reducing process barriers while opening new geometries that conventional microfabrication struggles to realise.</p>
-                </div></div>
-                <div class="sidebar-spread flex-column smaller"><div class="story">
-                    <div class="story-source"><a href="https://www.tctmagazine.com/dyndrite-to-lead-america-makes-artificial-intelligence-for-material-allowables-in-additive-manufacturing-project/">TCT Magazine</a></div>
-                    <h2 class="story-title"><a href="https://www.tctmagazine.com/dyndrite-to-lead-america-makes-artificial-intelligence-for-material-allowables-in-additive-manufacturing-project/">AI Allowables Project Takes Aim At LPBF Qualification Burden</a></h2>
-                    <div class="story-byline">By <span class="story-author">TCT Team</span></div>
-                    <img class="story-image" src="https://storage.ghost.io/c/f0/da/f0da4f6a-82b1-46cf-ab14-3cc5e6b2d473/content/images/size/w1200/2026/06/653fc84a05bcbe86cf4ccf13_Additive_20cam_201000px--1--1.png" alt="">
-                    <p>Dyndrite will lead the America Makes AIM-4AM project, a $2 million effort to develop AI-supported material allowables for laser powder bed fusion. The programme will use 17-4PH stainless steel data and validation testing to explore reduced-testing pathways for qualification without abandoning statistical confidence.</p>
-                </div><div class="story">
-                    <div class="story-source"><a href="https://www.tctmagazine.com/incodema3d-to-add-more-than-a-dozen-eos-metal-3d-printers-to-existing-fleet/">TCT Magazine</a></div>
-                    <h2 class="story-title"><a href="https://www.tctmagazine.com/incodema3d-to-add-more-than-a-dozen-eos-metal-3d-printers-to-existing-fleet/">Incodema3D Expands EOS Fleet For Contract Metal Production</a></h2>
-                    <div class="story-byline">By <span class="story-author">Sam Davies</span></div>
-                    <img class="story-image" src="https://storage.ghost.io/c/f0/da/f0da4f6a-82b1-46cf-ab14-3cc5e6b2d473/content/images/size/w1200/2026/06/System_EOS_M4_ONYX-1.jpg" alt="">
-                    <p>Incodema3D is adding more than a dozen EOS metal AM systems as part of a plan to triple capacity by 2030. The investment brings together printing, post-processing, machining, inspection and fulfilment under a vertically integrated production model for demanding industrial programmes.</p>
-                </div></div>
+                <div class="center-spread">
+                    <div class="story">
+                        <div class="story-source"><a href="https://www.voxelmatters.com/beehive-industries-places-50m-eos-order-to-scale-3d-printed-drone-engine-production/">VoxelMatters</a></div>
+                        <h2 class="story-title"><a href="https://www.voxelmatters.com/beehive-industries-places-50m-eos-order-to-scale-3d-printed-drone-engine-production/">Beehive Orders EOS Fleet For Drone Engines</a></h2>
+                        <div class="story-byline">By <span class="story-author">VoxelMatters</span></div>
+                        <img class="story-image" src="https://www.voxelmatters.com/wp-content/uploads/2026/06/Beehive-EOS-agreement-02-EOS_M4_ONYX.jpg" alt="">
+                        <p>Beehive Industries' $50 million order for 30 EOS M4 ONYX metal additive manufacturing systems is a capacity signal with unusually sharp industrial intent. The company is scaling production of 3D printed drone-engine hardware, and EOS described the purchase as the largest single publicly disclosed order in its history.</p>
+                        <p>The order matters because it links a named production platform, a defined machine count, and a defense-oriented propulsion application. In a sector where many additive manufacturing announcements remain pilot projects, Beehive is presenting metal AM as the manufacturing backbone for engine output, not as a side process for prototypes or development parts.</p>
+                        <p>For EOS, the deal is also a validation point for high-throughput laser powder bed fusion in aerospace and defense. The M4 ONYX systems give Beehive a route to repeatable metal-part production at scale, while the size of the order suggests that machine fleet economics, qualification work, and demand forecasts are now aligned closely enough to justify a major installation.</p>
+                        <p>The broader industry takeaway is that propulsion continues to be one of metal AM's strongest proving grounds. Complex cooling, part consolidation, lightweight structures, and rapid design iteration all fit the technology's strengths, but this order puts the emphasis on manufacturing volume: the test is no longer whether the parts can be printed, but whether they can be printed consistently enough to feed an engine program.</p>
+                    </div>
+                </div>
+                <div class="sidebar-spread flex-column smaller">
+                    <div class="story">
+                        <div class="story-source"><a href="https://www.voxelmatters.com/divergent-unveils-monolith-one-metal-3d-printer-and-opens-second-us-factory/">VoxelMatters</a></div>
+                        <h2 class="story-title"><a href="https://www.voxelmatters.com/divergent-unveils-monolith-one-metal-3d-printer-and-opens-second-us-factory/">Divergent Opens Monolith Era</a></h2>
+                        <div class="story-byline">By <span class="story-author">VoxelMatters</span></div>
+                        <img class="story-image" src="https://www.voxelmatters.com/wp-content/uploads/2026/06/Divergent-Monolith-One-01.jpeg" alt="">
+                        <p>Divergent has introduced Monolith One, an in-house laser powder bed fusion system, while opening a second U.S. factory. The move reinforces the company's vertically integrated view of metal AM, in which machine architecture, software, factory deployment and end-use part production are treated as a single industrial system.</p>
+                    </div>
+                    <div class="story">
+                        <div class="story-source"><a href="https://www.voxelmatters.com/ornls-mold-free-3d-printing-method-cuts-composite-fabrication-time-by-95/">VoxelMatters</a></div>
+                        <h2 class="story-title"><a href="https://www.voxelmatters.com/ornls-mold-free-3d-printing-method-cuts-composite-fabrication-time-by-95/">ORNL Cuts Mold Time</a></h2>
+                        <div class="story-byline">By <span class="story-author">VoxelMatters</span></div>
+                        <img class="story-image" src="https://www.voxelmatters.com/wp-content/uploads/2026/06/ORNL-mold-free-3D-printing-01.jpg" alt="">
+                        <p>Oak Ridge National Laboratory researchers report a hybrid additive method that removes the need for molds in composite fabrication and cuts production time by 95 percent. The advance targets one of composites manufacturing's most stubborn tradeoffs: tooling cost and lead time versus design flexibility.</p>
+                    </div>
+                </div>
             </div>
-            <div class="bottom flex-row"><div class="story" style="flex:1">
-                    <div class="story-source"><a href="https://3dprint.com/326273/hp-wants-3d-printing-to-stop-being-a-novelty/">3DPrint.com</a></div>
-                    <h2 class="story-title"><a href="https://3dprint.com/326273/hp-wants-3d-printing-to-stop-being-a-novelty/">HP Pushes AM From Novelty To Production Option</a></h2>
-                    <div class="story-byline">By <span class="story-author">Vanesa Listek</span></div>
-                    
-                    <p>HP’s additive manufacturing strategy is increasingly framed around ordinary production rather than novelty. The company is emphasising reliability, total cost of ownership, workflow automation and application fit so designers treat AM as one manufacturing option among many, rather than an exceptional prototyping route.</p>
-                </div><div class="story" style="flex:1">
-                    <div class="story-source"><a href="https://www.voxelmatters.com/formlabs-is-launching-something-big-on-june-9th/">VoxelMatters</a></div>
-                    <h2 class="story-title"><a href="https://www.voxelmatters.com/formlabs-is-launching-something-big-on-june-9th/">Formlabs Teases Next Wave In Polymer Production</a></h2>
-                    <div class="story-byline">By <span class="story-author">Davide Sher</span></div>
-                    
-                    <p>Formlabs has scheduled a June 9 product reveal after signalling its next move beyond desktop SLA and polymer powder bed fusion. With SLS and production polymer printing becoming more competitive, the announcement is being watched as a possible marker for the company’s next industrial push.</p>
-                </div></div>
+            <div class="bottom flex-row">
+                <div class="story" style="flex:1">
+                    <div class="story-source"><a href="https://3dprintingindustry.com/news/u-s-air-force-to-outfit-entire-c-17-fleet-with-3d-printed-drag-reduction-devices-252389/">3D Printing Industry</a></div>
+                    <h2 class="story-title"><a href="https://3dprintingindustry.com/news/u-s-air-force-to-outfit-entire-c-17-fleet-with-3d-printed-drag-reduction-devices-252389/">Air Force Prints Drag Cuts</a></h2>
+                    <div class="story-byline">By <span class="story-author">3D Printing Industry</span></div>
+                    <p>The U.S. Air Force plans to outfit the C-17 fleet with 3D printed microvanes, small aerodynamic inserts developed with the Air Force Research Laboratory and Air Mobility Command. The deployment shows additive manufacturing moving into fleet-level sustainment and efficiency work, where modest components can have operational consequences across many aircraft.</p>
+                </div>
+                <div class="story" style="flex:1">
+                    <div class="story-source"><a href="https://3dprintingindustry.com/news/hybrid-3d-bioprinting-achieves-capillary-scale-vascular-networks-252413/">3D Printing Industry</a></div>
+                    <h2 class="story-title"><a href="https://3dprintingindustry.com/news/hybrid-3d-bioprinting-achieves-capillary-scale-vascular-networks-252413/">Bioprinting Reaches Capillaries</a></h2>
+                    <div class="story-byline">By <span class="story-author">Aura Moreno</span></div>
+                    <img class="story-image" src="https://3dprintingindustry.com/wp-content/uploads/2026/06/ChatGPT-Image-Jun-17-2026-11_46_09-AM-150x100.png" alt="">
+                    <p>Researchers at the University of Notre Dame and Harvard Medical School report hybrid 3D bioprinting of vascular networks at capillary-scale resolution. The work addresses a central tissue-engineering problem: building channels fine enough to support living constructs beyond simple lab demonstrations.</p>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="briefs"><h3>News Briefs</h3><div class="brief-item">
-            <h4><a href="https://www.tctmagazine.com/">TCT Sets Out Post-Show Future</a></h4>
-            <div class="brief-meta">TCT Magazine</div>
-            <p>TCT 3Sixty will not return as a traditional NEC exhibition in 2027, with the publisher signalling a change in format after the 2026 event.</p>
-        </div><div class="brief-item">
-            <h4><a href="https://3dprint.com/326448/crealitys-listing-a-sign-that-chinas-consumer-3d-printing-has-entered-a-new-phase-of-global-competition/">Creality Listing Highlights Consumer 3D Printing Scale</a></h4>
-            <div class="brief-meta">3DPrint.com</div>
-            <p>Creality’s Hong Kong listing underlines how consumer 3D printing is becoming a global platform business built around machines, software, models and user ecosystems.</p>
-        </div><div class="brief-item">
-            <h4><a href="https://www.tctmagazine.com/">Massivit Adds Aerospace Defence Adviser</a></h4>
-            <div class="brief-meta">TCT Magazine</div>
-            <p>Massivit has appointed Brigadier General Chris Athearn to its advisory board to support aerospace and defence expansion in the United States.</p>
-        </div><div class="brief-item">
-            <h4><a href="https://www.tctmagazine.com/">Stratasys-Markforged Deal Keeps Binder Jetting Separate</a></h4>
-            <div class="brief-meta">TCT Magazine</div>
-            <p>Stratasys’ proposed acquisition of Markforged from Nano Dimension remains an industrialisation play, while Markforged’s metal binder jetting line is outside the transaction.</p>
-        </div><div class="brief-item">
-            <h4><a href="https://3dprint.com/">AM Financials Show Capital Pressure And Portfolio Moves</a></h4>
-            <div class="brief-meta">3DPrint.com</div>
-            <p>Public AM companies continue to rebalance through capital raises, mergers and portfolio changes as the sector moves from promise to profitability.</p>
-        </div><div class="brief-item">
-            <h4><a href="https://3dprint.com/">Disney Uses 3D Printing For Attraction Character Comeback</a></h4>
-            <div class="brief-meta">3DPrint.com</div>
-            <p>A Disney attraction repair story shows 3D printing’s quiet role in entertainment maintenance, where replacement parts and character elements can be recreated without restarting old tooling chains.</p>
-        </div><div class="brief-item">
-            <h4><a href="https://3dprint.com/">UT Team Explores Tabletop EUV Lithography Route</a></h4>
-            <div class="brief-meta">3DPrint.com</div>
-            <p>Researchers are using 3D printing as part of a compact lithography approach, pointing to more accessible semiconductor-process experimentation.</p>
-        </div><div class="brief-item">
-            <h4><a href="https://3dprint.com/">Flashforge Releases Wax 3D Printer</a></h4>
-            <div class="brief-meta">3DPrint.com</div>
-            <p>Flashforge has moved into wax printing, reopening interest in workflows for jewellery, casting and high-detail sacrificial patterns.</p>
-        </div></div>
-    <div class="fun-corner"><h3>Fun Corner — From the Front Page of r/AdditiveManufacturing &amp; r/3Dprinting &amp; r/functionalprint</h3><div class="fun-corner-grid"><div class="fun-item">
-                <h4><a href="https://www.reddit.com/r/3Dprinting/comments/1lnsdvb/how_can_i_achieve_a_smoother_finish/">How can I achieve a smoother finish?</a></h4>
-                <div class="fun-meta">r/3Dprinting · score unavailable</div>
-                <p>A practical finishing discussion returns to sanding, coatings and the eternal fight against visible layer lines.</p>
-            </div><div class="fun-item">
-                <h4><a href="https://www.reddit.com/r/3Dprinting/comments/1mkyl5z/how_to_get_professional_smooth_3d_prints/">How to get “professional” smooth 3D prints</a></h4>
-                <div class="fun-meta">r/3Dprinting · score unavailable</div>
-                <p>The community debates how far filler, epoxy, paint and patience can push FDM parts towards moulded-product appearance.</p>
-            </div><div class="fun-item">
-                <h4><a href="https://www.reddit.com/r/3Dprinting/comments/1ttj9ij/purchase_advice_megathread_june_2026/">Purchase Advice Megathread - June 2026</a></h4>
-                <div class="fun-meta">r/3Dprinting · score unavailable</div>
-                <p>The monthly printer-buying thread captures the market mood as users compare machines, materials and realistic first-use expectations.</p>
-            </div><div class="fun-item">
-                <h4><a href="https://www.reddit.com/r/3Dprinting/comments/1lsz0oa/why_this_brass_sculpture_has_layer_lines/">Why this brass sculpture has layer lines</a></h4>
-                <div class="fun-meta">r/3Dprinting · score unavailable</div>
-                <p>A layer-line mystery in metal art becomes a miniature lesson in moulds, machining, casting and surface traces.</p>
-            </div><div class="fun-item">
-                <h4><a href="https://www.reddit.com/r/AdditiveManufacturing/comments/c3pmmr/which_academic_journals_do_you_follow_for_3d/">Which academic journals do you follow for 3D printing research?</a></h4>
-                <div class="fun-meta">r/AdditiveManufacturing · score unavailable</div>
-                <p>An older but still useful thread maps the community’s journal-reading habits and confirms why RSS feeds remain valuable for AM research monitoring.</p>
-            </div><div class="fun-item">
-                <h4><a href="https://www.reddit.com/r/AdditiveManufacturing/comments/1dgphwc/favorite_manufactures_for_low_volume_mjfsls/">Favorite manufacturers for low volume MJF/SLS production</a></h4>
-                <div class="fun-meta">r/AdditiveManufacturing · score unavailable</div>
-                <p>A sourcing question shows how AM users compare service bureaus once a project grows beyond prototypes into low-volume production.</p>
-            </div></div></div>
-    <div class="paper-spotlight"><h3>Research Spotlight</h3><div class="paper-title"><a href="https://www.tandfonline.com/doi/full/10.1080/17452759.2026.2632456">Additively Manufactured Arrays of Triaxial Electrospray Emitters for Scalable Generation of Core-Shell-Shell Microdroplets</a></div>
-        <div class="paper-authors">Bryan Ivan Quintanar-Abarca and Luis Fernando Velásquez-García — Virtual and Physical Prototyping</div>
-        <p>Printed electrospray arrays show how vat photopolymerisation can replace cleanroom routes for compact microfluidic production devices.</p></div>
-    <div class="journal-watch"><h3>Journal Watch</h3><div class="journal-entry">
-            <h4><a href="https://doi.org/10.1016/j.addlet.2025.100343">Electroslag Additive Manufacturing: A Pathway for High Throughput Near Net Shape Production</a></h4>
-            <div class="journal-name">Additive Manufacturing Letters</div>
-            <div class="journal-authors">Adam G. Stevens, Vanshika Singh, Rangasayee Kannan, David Hebble, Sarah Graham, Paritosh Mhatre, Kevin Zinn, Christopher Masuo, William Carter, Jesse Heineman, Andres Marquez Rossy, Alexandra B. Shanafield, Charles Savage, Alex Roschli, Brian Hicks, Peeyush Nandwana, S. S. Babu and Brian K. Post</div>
-            <p>A high-deposition electroslag route paired with wire-arc concepts is proposed for large near-net-shape metal components.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://arxiv.org/abs/2603.09353">Interactive 3D Visualization of Surface Roughness Predictions in Additive Manufacturing</a></h4>
-            <div class="journal-name">arXiv</div>
-            <div class="journal-authors">Engin Deniz Erkan, Elif Surer and Ulas Yaman</div>
-            <p>A data-driven interface predicts and visualises material-extrusion roughness across part faces before fabrication.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://arxiv.org/html/2603.25688v1">Intelligent Navigation and Obstacle-Aware Fabrication for Mobile Additive Manufacturing Systems</a></h4>
-            <div class="journal-name">arXiv / MSEC 2026</div>
-            <div class="journal-authors">Yifei Li, Ruizhe Fu, Huihang Liu, Guha Manogharan, Feng Ju and Ilya Kovalenko</div>
-            <p>Mobile fabrication planning is linked with obstacle-aware navigation for robotic AM systems outside fixed workcells.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://arxiv.org/abs/2604.07359">Laser Powder Bed Fusion Melt Pool Dynamics for Different Geometric Variations and Powder Layer Heights</a></h4>
-            <div class="journal-name">arXiv</div>
-            <div class="journal-authors">Badhon Kumar, Rakibul Islam Kanak, Nishat Sultana, Jiachen Guo, Andrew Schrader, Wing Kam Liu and Abdullah Al Amin</div>
-            <p>High-fidelity melt-pool simulation is validated against NIST experiments for layer-height and geometry variations.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://www.mdpi.com/">Exploring Metal Additive Manufacturing in Martian Atmospheric Environments</a></h4>
-            <div class="journal-name">Journal of Manufacturing and Materials Processing</div>
-            <div class="journal-authors">Zane Mebruer and Wan Shou</div>
-            <p>A Martian-atmosphere LPBF test asks whether CO₂-rich environments can support future off-world part production.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://www.tandfonline.com/doi/full/10.1080/27525783.2026.2613469">Quality-Centric Digital Twins in Additive Manufacturing</a></h4>
-            <div class="journal-name">Digital Manufacturing Technology</div>
-            <div class="journal-authors">M. V. Ehteshamfar and co-authors</div>
-            <p>The review frames digital twins as a quality-centred layer for predictive and corrective AM production control.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://www.tandfonline.com/doi/full/10.1080/17452759.2026.2627763">3D Printing of Electromagnetically Functional Materials for RF Devices</a></h4>
-            <div class="journal-name">Virtual and Physical Prototyping</div>
-            <div class="journal-authors">F. Zhang and co-authors</div>
-            <p>The paper reviews how AM routes are being used to fabricate radio-frequency components and functional electromagnetic structures.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://www.tandfonline.com/doi/full/10.1080/17452759.2026.2632456">Explainable AI Analysis of Printing Parameter Effects on Life-Cycle Performance</a></h4>
-            <div class="journal-name">Virtual and Physical Prototyping</div>
-            <div class="journal-authors">Y. Zhu and co-authors</div>
-            <p>Explainable AI is used to interpret how process settings influence wider performance outcomes in AM.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://www.springerprofessional.de/en/quantitative-surface-roughness-analysis-of-selective-masking-ele/52509134">Quantitative Surface Roughness Analysis of Selective Masking Electrochemical Polishing</a></h4>
-            <div class="journal-name">Progress in Additive Manufacturing</div>
-            <div class="journal-authors">Authors listed by Springer Professional</div>
-            <p>Selective masking electrochemical polishing is examined as a route for smoothing AM titanium lattice surfaces.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://www.nist.gov/publications/ultra-high-speed-printing-regime-laser-powder-bed-fusion-highly-reflective-metals">Ultra-High Speed Printing Regime in Laser Powder Bed Fusion of Highly Reflective Metals</a></h4>
-            <div class="journal-name">NIST publication</div>
-            <div class="journal-authors">N. Kublik and co-authors</div>
-            <p>A high-speed LPBF regime for reflective metals is presented as a route to more efficient copper and aluminium processing.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://felixwechsler.science/">Too Big, Too Small, Too O₂: The Pandoro Effect from Oxygen Gradients in TVAM</a></h4>
-            <div class="journal-name">arXiv preprint</div>
-            <div class="journal-authors">Riccardo Rizzo, Felix Wechsler, Qianyi Zhang and Christophe Moser</div>
-            <p>The study identifies an oxygen-gradient artifact in tomographic volumetric AM and proposes correction strategies.</p>
-        </div><div class="journal-entry">
-            <h4><a href="https://larsonlab.stanford.edu/publications">Rotational Multimaterial 3D Printing of Soft Robotic Matter With Embedded Asymmetrical Pneumatics</a></h4>
-            <div class="journal-name">Advanced Materials</div>
-            <div class="journal-authors">Jackson K. Wilt, Natalie M. Larson and Jennifer A. Lewis</div>
-            <p>Rotational multimaterial printing enables soft robotic architectures with embedded pneumatic asymmetry.</p>
-        </div></div>
+
+    <div class="briefs">
+        <h3>News Briefs</h3>
+        <div class="brief-item"><h4><a href="https://3dprintingindustry.com/news/heygears-g1-series-desktop-full-color-3d-and-uv-printer-technical-specifications-and-pricing-252408/">HeyGears Opens G1 Reservations</a></h4><div class="brief-meta">3D Printing Industry</div><p>HeyGears has opened reservations for its G1 Series desktop full-color 3D and UV printer ahead of a planned Kickstarter launch in July.</p></div>
+        <div class="brief-item"><h4><a href="https://3dprintingindustry.com/news/hi3d-enhances-its-maker-toolkit-targeting-the-gap-between-ai-and-printing-252390/">Hi3D Bridges AI And Printing</a></h4><div class="brief-meta">3D Printing Industry</div><p>Hi3D updated its maker toolkit, aiming to shorten the distance between AI-assisted design and printable models.</p></div>
+        <div class="brief-item"><h4><a href="https://3dprint.com/321883/3d-printed-chip-packaging-specialist-xtpl-enters-japanese-market/">XTPL Enters Japan</a></h4><div class="brief-meta">3DPrint.com</div><p>3D printed chip-packaging specialist XTPL is moving into Japan, extending additive electronics activity in a strategically important semiconductor market.</p></div>
+        <div class="brief-item"><h4><a href="https://3dprint.com/321878/fabri-raises-13-5-million-to-create-digital-foundry/">Fabri Raises $13.5 Million</a></h4><div class="brief-meta">3DPrint.com</div><p>Fabri raised $13.5 million to build a digital foundry model for distributed manufacturing and rapid production workflows.</p></div>
+        <div class="brief-item"><h4><a href="https://3dprinting.com/news/formlabs-launches-fuse-x1-industrial-sls-printer-starting-at-84999/">Formlabs Launches Fuse X1</a></h4><div class="brief-meta">3DPrinting.com</div><p>Formlabs introduced the Fuse X1 industrial SLS printer, expanding its powder bed fusion line into a higher-price production segment.</p></div>
+        <div class="brief-item"><h4><a href="https://www.tctmagazine.com/additive-manufacturing-3d-printing-news/polymer-additive-manufacturing-news/stratasys-launches-flame-retardant-fdm-material-for-rail-and-transportation-applications/">Stratasys Adds Rail Material</a></h4><div class="brief-meta">TCT Magazine</div><p>Stratasys launched a flame-retardant FDM material aimed at rail and transportation applications where safety standards drive polymer selection.</p></div>
+        <div class="brief-item"><h4><a href="https://www.manufacturingtomorrow.com/news/2026/06/18/hp-marks-a-decade-of-additive-manufacturing-innovation-by-introducing-the-new-hp-mjf-1200-3d-printer-at-rapid-tct/25598/">HP Marks MJF Decade</a></h4><div class="brief-meta">ManufacturingTomorrow</div><p>HP marked ten years of additive manufacturing activity by introducing the HP MJF 1200 3D printer at RAPID + TCT.</p></div>
+        <div class="brief-item"><h4><a href="https://3dprinting.com/news/tdk-to-acquire-3d-printing-firm-fabric8labs-for-up-to-400-million/">TDK Targets Fabric8Labs</a></h4><div class="brief-meta">3DPrinting.com</div><p>TDK plans to acquire Fabric8Labs for up to $400 million, a sign of rising interest in additive approaches for electronics and advanced manufacturing.</p></div>
+    </div>
+
+    <div class="fun-corner">
+        <h3>Fun Corner — From the Front Page of r/AdditiveManufacturing &amp; r/3Dprinting &amp; r/functionalprint</h3>
+        <div class="fun-corner-grid">
+            <div class="fun-item"><h4><a href="https://www.reddit.com/r/functionalprint/comments/1u9h90z/oc_i_made_a_pc_fan_oscillate_itself/">PC Fan Learns To Sway</a></h4><div class="fun-meta">r/functionalprint · score unavailable via RSS</div><p>A maker turned a PC fan into an oscillating air mover, a small mechanism with shop-bench charm.</p></div>
+            <div class="fun-item"><img class="story-image" src="https://preview.redd.it/omue80plf38h1.jpeg?width=640&amp;crop=smart&amp;auto=webp&amp;s=e78541cc0f97c1e83f1c83f81b481de1e48a1d04" alt=""><h4><a href="https://www.reddit.com/r/functionalprint/comments/1u9g26d/made_6pack_version/">Six-Pack Carrier Gets Printed</a></h4><div class="fun-meta">r/functionalprint · score unavailable via RSS</div><p>A printed carrier expands a handle concept into a six-can version for everyday use.</p></div>
+            <div class="fun-item"><img class="story-image" src="https://preview.redd.it/6oh8ax2hko7h1.png?width=640&amp;crop=smart&amp;auto=webp&amp;s=9f54d04e6d00aa358b206928c5d7ab254df6bf62" alt=""><h4><a href="https://www.reddit.com/r/functionalprint/comments/1u98g0u/got_a_lot_of_hate_for_this_functional_print/">Divisive Print Finds A Job</a></h4><div class="fun-meta">r/functionalprint · score unavailable via RSS</div><p>A functional print with a contested design still makes a case for practical, problem-specific parts.</p></div>
+            <div class="fun-item"><img class="story-image" src="https://preview.redd.it/17i5xbker18h1.jpg?width=140&amp;height=140&amp;crop=1:1,smart&amp;auto=webp&amp;s=907b9ccdc949c0f5cf315d3143d5b73baee717e0" alt=""><h4><a href="https://www.reddit.com/r/functionalprint/comments/1u972ot/3d_printed_replacements_for_ceiling_fan_shade/">Ceiling Fan Hardware Gets Replaced</a></h4><div class="fun-meta">r/functionalprint · score unavailable via RSS</div><p>A small printed replacement part keeps a household fixture in service without a store run.</p></div>
+            <div class="fun-item"><img class="story-image" src="https://external-preview.redd.it/bzdpenIwbmxxeDdoMZy4SHGAhHKZ98C2R1w4OPWlBvuB5-5j-uvA39GAtVvG.png?width=640&amp;crop=smart&amp;auto=webp&amp;s=a336a794f73360d063da352ba5b3bcb96725380c" alt=""><h4><a href="https://www.reddit.com/r/functionalprint/comments/1u8rgc0/3d_printing_and_finishing_nails_make_a_lovely/">Finishing Nails Meet Printed Holder</a></h4><div class="fun-meta">r/functionalprint · score unavailable via RSS</div><p>A printed light holder combines polymer geometry with simple finishing nails for a tidy fixture.</p></div>
+            <div class="fun-item"><img class="story-image" src="https://preview.redd.it/9hj89j97vu7h1.jpg?width=140&amp;height=140&amp;crop=1:1,smart&amp;auto=webp&amp;s=1602db8afe8eb2998391d0a79481e5760330fafb" alt=""><h4><a href="https://www.reddit.com/r/functionalprint/comments/1u8ca5s/water_jug_holder_for_trunk_velcro_strips_for/">Trunk Jugs Stay Put</a></h4><div class="fun-meta">r/functionalprint · score unavailable via RSS</div><p>A printed water-jug holder with Velcro slots turns loose cargo into a repeatable storage system.</p></div>
+        </div>
+    </div>
+
+    <div class="paper-spotlight">
+        <h3>Research Spotlight</h3>
+        <div class="paper-title"><a href="https://www.sciencedirect.com/science/article/pii/S2772369026000393?dgcid=rss_sd_all">Temperature-dependent tensile and fatigue behaviors of a novel reactive additively manufactured A1000 aluminum metal matrix composite</a></div>
+        <div class="paper-authors">Md Faysal Khan, Paul R. Gradl, Shuai Shao, Nima Shamsaei — Additive Manufacturing Letters</div>
+        <p>This paper stands out because it connects a new reactive additively manufactured aluminum composite to the practical questions that decide aerospace adoption: tensile behavior and fatigue over temperature. The author team gives designers a clearer view of where the material may keep useful strength and where qualification work will need caution.</p>
+    </div>
+
+    <div class="journal-watch">
+        <h3>Journal Watch</h3>
+        <div class="journal-entry"><h4><a href="https://www.sciencedirect.com/science/article/pii/S2214860426001958?dgcid=rss_sd_all">Mapping printable ceramic gels</a></h4><div class="journal-name">Additive Manufacturing</div><div class="journal-authors">Zhidong Luo, Rishav Agrawal, Sean Flynn, Esther Garcia-Tunon</div><p>The study links rheology to microstructure evolution in direct ink writing of ceramic gels.</p></div>
+        <div class="journal-entry"><h4><a href="https://www.sciencedirect.com/science/article/pii/S221486042600196X?dgcid=rss_sd_all">Quantifying binder-jetting error online</a></h4><div class="journal-name">Additive Manufacturing</div><div class="journal-authors">Tianxiong Hu, Zhongde Shan, Haoqin Yang, Dandan Yan, Haoming Shi, Jian Huang, Jun Wang</div><p>An end-state-anchored method aims to connect in-situ binder jetting data to final part error.</p></div>
+        <div class="journal-entry"><h4><a href="https://www.sciencedirect.com/science/article/pii/S2214860426001946?dgcid=rss_sd_all">Electrodeposition prints microstructures</a></h4><div class="journal-name">Additive Manufacturing</div><div class="journal-authors">Jiajun Ji, Xu Lin, Youwang Hu, Pingmei Ming, Wanfei Ren, Jinlong Song</div><p>Cold-liquid silicone oil is used to constrain meniscus-confined electrodeposition for additive microstructure fabrication.</p></div>
+        <div class="journal-entry"><h4><a href="https://www.sciencedirect.com/science/article/pii/S2214860426001867?dgcid=rss_sd_all">Superalloy porosity meets synchrotron fatigue</a></h4><div class="journal-name">Additive Manufacturing</div><div class="journal-authors">Krzysztof S. Stopka, Jose Javier Solano, Peter Kenesei, Jun-Sang Park, Hemant Sharma, Michael D. Sangid</div><p>The paper probes how porosity affects micromechanical and fatigue behavior in an additively manufactured superalloy.</p></div>
+        <div class="journal-entry"><h4><a href="https://arxiv.org/abs/2606.16186v1">MOSAIC segments L-PBF keyholes</a></h4><div class="journal-name">arXiv LPBF</div><div class="journal-authors">Garrett Mathesen</div><p>The method rapidly segments operando x-ray imagery to characterize keyhole behavior under difficult imaging conditions.</p></div>
+        <div class="journal-entry"><h4><a href="https://arxiv.org/abs/2606.10227v1">Graph transformer predicts metal AM quality</a></h4><div class="journal-name">arXiv additive manufacturing</div><div class="journal-authors">Joyce Karen Pelaez</div><p>A spatiotemporal graph transformer models multi-layer neighborhood interactions that shape metal AM build quality.</p></div>
+        <div class="journal-entry"><h4><a href="https://link.springer.com/article/10.1007/s40964-026-01779-5">TPU powder ages across builds</a></h4><div class="journal-name">Progress in Additive Manufacturing</div><div class="journal-authors">William Turnier-Trottier, Vladimir Brailovski</div><p>The paper evaluates TPU 1301 powder degradation across eight PBF-LB build cycles without refresh.</p></div>
+        <div class="journal-entry"><h4><a href="https://link.springer.com/article/10.1007/s40964-026-01796-4">SLM titanium composite gains surface data</a></h4><div class="journal-name">Progress in Additive Manufacturing</div><div class="journal-authors">Wei Liu, Qiusheng Xie, Ruifeng Zhao, Qian Gao, Pengcheng Huo</div><p>Silver-coated graphene reinforcement is studied for friction and corrosion behavior in SLM titanium composites.</p></div>
+        <div class="journal-entry"><h4><a href="https://iopscience.iop.org/article/10.1088/2631-7990/ae6f56">Maraging MEA balances strength and ductility</a></h4><div class="journal-name">International Journal of Extreme Manufacturing</div><div class="journal-authors">Jae Heung Lee, Hyeonseok Kwon, Bon Woo Koo, Sang Guk Jeong, Jaemin Wang, and colleagues</div><p>LPBF cellular-structure control enables an ultrastrong and ductile maraging medium-entropy alloy.</p></div>
+        <div class="journal-entry"><h4><a href="https://www.sciencedirect.com/science/article/pii/S0278612526001305?dgcid=rss_sd_all">Federated learning watches LPBF anomalies</a></h4><div class="journal-name">Journal of Manufacturing Systems</div><div class="journal-authors">Jungmin Kim, Yuebin Guo, Ahmed Aziz Ezzat, Weihong Grace Guo</div><p>A distributionally robust asynchronous federated learning method targets anomaly detection in laser powder bed fusion.</p></div>
+        <div class="journal-entry"><h4><a href="https://www.tandfonline.com/doi/full/10.1080/17452759.2026.2614811?af=R">Robot prints embedded silicone</a></h4><div class="journal-name">Virtual and Physical Prototyping</div><div class="journal-authors">Hailin Sun, Yingjun Tian, Chenyu Xu, Mahdi Bodaghi, Fei Gao, Guoxin Fang</div><p>Robot-assisted multi-axis embedded silicone printing expands free-form volumetric model fabrication.</p></div>
+        <div class="journal-entry"><h4><a href="https://www.sciencedirect.com/science/article/pii/S2772369026000423?dgcid=rss_sd_all">Synthetic anomalies support PBF-LB/M</a></h4><div class="journal-name">Additive Manufacturing Letters</div><div class="journal-authors">Lennart Jutte, Jan Philipps, Nick Schwarz, Tammo Ripken, Hendrik Sandmann</div><p>The paper examines how synthetic anomaly data could support monitoring and analysis in metal laser powder bed fusion.</p></div>
+    </div>
+
     <footer>Generated by an AI editor from public RSS feeds and research papers. Layout inspired by <a href="https://github.com/thesephist/unim.press">unim.press</a>.</footer>
 </div>
 </body>
