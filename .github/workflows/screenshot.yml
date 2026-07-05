@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "index.html"
   workflow_dispatch:
 
 permissions:
@@ -21,25 +23,31 @@ jobs:
         run: |
           npm init -y
           npm install playwright
-          npx playwright install chromium
+          npx playwright install --with-deps chromium
 
-      - name: Wait for GitHub Pages update
-        run: sleep 60
-
-      - name: Take screenshot
+      - name: Take screenshot from local index.html
         run: |
           cat > screenshot.js <<'EOF'
           const { chromium } = require('playwright');
+          const path = require('path');
+          const { pathToFileURL } = require('url');
 
           (async () => {
             const browser = await chromium.launch();
             const page = await browser.newPage({
-              viewport: { width: 1400, height: 1000 }
+              viewport: { width: 1400, height: 1000 },
+              deviceScaleFactor: 1
             });
 
-            await page.goto('https://joskov71.github.io/AMweekly/', {
+            const fileUrl = pathToFileURL(path.join(process.cwd(), 'index.html')).href;
+
+            await page.goto(fileUrl, {
               waitUntil: 'networkidle'
             });
+
+            // Give external fonts/images a little extra time.
+            await page.evaluate(() => document.fonts && document.fonts.ready);
+            await page.waitForTimeout(2000);
 
             await page.screenshot({
               path: 'snapshot.png',
